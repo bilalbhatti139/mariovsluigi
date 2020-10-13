@@ -1,0 +1,101 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+}
+
+.gameContainer {
+  display: flex;
+  justify-content: space-around;
+  margin: 50px 0px;
+}
+
+.main-title {
+  text-align: center;
+}
+
+#mapBox {
+  display: grid;
+  grid-template-columns: 100px 100px 100px 100px 100px 100px 100px 100px 100px;
+  grid-template-rows: 100px 100px 100px 100px 100px 100px 100px 100px 100px;
+  position: relative;
+}
+
+.gameBox {
+  border: 1px solid #ffffff;
+  background: #ff5768;
+}
+
+.gameBox:nth-child(even) {
+  background: #63d532;
+}
+
+.scoreBoard {
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.new-game {
+  background: #ff5768;
+  border: 1px solid #ff5768;
+  padding: 15px 45px;
+  font-weight: 700;
+  box-shadow: 0 10px 20px 0 rgba(255, 87, 104, 0.35);
+  color: #fff;
+  outline: none;
+}
+
+.game-rules {
+  background: #63d532;
+  border: 1px solid #63d532;
+  padding: 15px 45px;
+  font-weight: 700;
+  box-shadow: 0 10px 20px 0 rgb(99 213 50 / 0.35);
+  color: #fff;
+  outline: none;
+}
+
+.game-buttons {
+  margin-top: 20px;
+}
+
+.modal-body ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.title-mario {
+  background: #ff5768;
+  color: #fff;
+  padding: 20px;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+}
+
+.title-luigi {
+  background: #63d532;
+  color: #fff;
+  padding: 20px;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+}
+
+.content {
+  padding: 20px;
+  text-align: center;
+}
+
+.content > div {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+
+/*# sourceMappingURL=/style.78032849.css.map */

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mario vs Luigi</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.78032849.css">
+  <script src="/style.78032849.js"></script></head>
+  <body>
+    <main>
+      <div class="main-title">
+        <h1>My Game</h1>
+        <div class="game-buttons">
+          <button id="newGame" class="new-game">New Game</button>
+          <button class="game-rules" data-toggle="modal" data-target="#exampleModal">
+            Game Rules
+          </button>
+        </div>
+      </div>
+
+      <div class="gameContainer">
+        <div class="scoreBoard playerOne">
+          <div class="title-mario">
+            <h2 id="p1-name">Player 1</h2>
+          </div>
+          <div class="content">
+            <div>
+              <div id="p1-image"></div>
+            </div>
+            <div>
+              <span id="p1-health-image"></span>
+              <span id="p1-health">0</span>
+            </div>
+
+            <div>
+              <span id="p1-weapon"></span>
+              <span id="p1-damage">0</span>
+            </div>
+
+            <div>
+              <span id="p1-shield-image"></span>
+              <span id="p1-shield">Protected</span>
+            </div>
+          </div>
+        </div>
+        <div id="mapBox"></div>
+        <div class="scoreBoard playerTwo">
+          <div class="title-luigi">
+            <h2 id="p2-name">Player 2</h2>
+          </div>
+          <div class="content">
+            <div>
+              <div id="p2-image"></div>
+            </div>
+            <div>
+              <span id="p2-health-image"></span>
+              <span id="p2-health">0</span>
+            </div>
+
+            <div>
+              <span id="p2-weapon"></span>
+              <span id="p2-damage">0</span>
+            </div>
+
+            <div>
+              <span id="p2-shield-image"></span>
+              <span id="p2-shield">Protected</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">
+              Mario vs Luigi Game Rules
+            </h5>
+          </div>
+          <div class="modal-body">
+            <ul>
+              <li>Game rules</li>
+              <li>Game rules</li>
+              <li>Game rules</li>
+              <li>Game rules</li>
+              <li>Game rules</li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="new-game" data-dismiss="modal">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="/app.c3f9f951.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+  </body>
+</html>
