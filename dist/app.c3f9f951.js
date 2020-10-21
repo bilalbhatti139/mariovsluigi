@@ -146,6 +146,10 @@ var Player = function Player(name, image, weapon) {
         image: "<img src=\"".concat(_this.weapon, "\" alt=\"").concat(_this.name, "\" width=\"70\"/>"),
         damage: 10
       },
+      location: {
+        row: 0,
+        column: 0
+      },
       shield: false
     };
   });
@@ -266,6 +270,12 @@ exports.default = void 0;
 
 var _assets = require("./assets");
 
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -276,18 +286,38 @@ var Game = function Game(players) {
   _classCallCheck(this, Game);
 
   _defineProperty(this, "reset", function () {
+    var _iterator = _createForOfIteratorHelper(_this.gridSquares),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var tile = _step.value;
+        tile.innerHTML = "";
+        tile.removeAttribute("class");
+      }
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+
     _this.players.map(function (player) {
-      console.log(player.health);
+      document.querySelector("#p".concat(player.id, "-name")).innerHTML = "";
       document.querySelector("#p".concat(player.id, "-name")).innerHTML = player.name;
+      document.querySelector("#p".concat(player.id, "-image")).innerHTML = "";
       document.querySelector("#p".concat(player.id, "-image")).innerHTML = player.image;
+      document.querySelector("#p".concat(player.id, "-health-image")).innerHTML = "";
       document.querySelector("#p".concat(player.id, "-health-image")).innerHTML = "<img src=\"".concat(_assets.health, "\" width=\"70\" />");
+      document.querySelector("#p".concat(player.id, "-health")).innerHTML = "";
       document.querySelector("#p".concat(player.id, "-health")).innerHTML = player.health;
+      document.querySelector("#p".concat(player.id, "-weapon")).innerHTML = "";
       document.querySelector("#p".concat(player.id, "-weapon")).innerHTML = player.weapon.image;
+      document.querySelector("#p".concat(player.id, "-damage")).innerHTML = "";
       document.querySelector("#p".concat(player.id, "-damage")).innerHTML = player.weapon.damage;
       document.querySelector("#p".concat(player.id, "-shield")).innerHTML = player.shield ? "Protected" : "Unprotected";
       document.querySelector("#p".concat(player.id, "-shield-image")).innerHTML = "<img src=\"".concat(_assets.shield, "\" width=\"70\" />");
 
-      _this.placeItem(player.image, "player");
+      _this.placeItem(player, "player");
     });
 
     for (var i = 0; i < 15; i++) {
@@ -297,35 +327,76 @@ var Game = function Game(players) {
     _this.placeItem("<img src=\"".concat(_assets.knife, "\" width=\"70\" />"), "weapon");
 
     _this.placeItem("<img src=\"".concat(_assets.bomb, "\" width=\"70\" />"), "weapon");
+
+    _this.currentPlayer = _this.players[Math.floor(Math.random() * _this.players.length)];
+
+    _this.detectTurn();
   });
 
   _defineProperty(this, "init", function () {
     _this.reset();
-
-    console.log("Game has started..");
-    console.log(_this.players);
   });
 
   _defineProperty(this, "placeItem", function (item, type) {
     var randomSquare = Math.floor(Math.random() * _this.gridSquares.length);
     var objClass = _this.gridSquares[randomSquare].classList;
 
-    if (objClass.contains("weapon") && objClass.contains("player") && objClass.contains("obstacle")) {
+    if (objClass.contains("weapon") || objClass.contains("player") || objClass.contains("obstacle")) {
       _this.placeItem(item, type);
     } else {
-      _this.gridSquares[randomSquare].innerHTML = item;
+      if (type === "player") {
+        _this.gridSquares[randomSquare].innerHTML = item.image;
+        var _this$gridSquares$ran = _this.gridSquares[randomSquare].dataset,
+            row = _this$gridSquares$ran.row,
+            column = _this$gridSquares$ran.column;
+        _this.players[item.id - 1].location = {
+          row: row,
+          column: column
+        };
+      } else {
+        _this.gridSquares[randomSquare].innerHTML = item;
+      }
+
+      _this.gridSquares[randomSquare].classList.add(type);
     }
+  });
+
+  _defineProperty(this, "detectTurn", function () {
+    var panel = document.querySelector("#player".concat(_this.currentPlayer.id));
+    console.log(panel);
+    panel.classList.add("active");
+
+    _this.playerMoves();
+  });
+
+  _defineProperty(this, "playerMoves", function () {
+    var north1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 1, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
+    var north2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 2, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
+    var north3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 3, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
+    north1.classList.add("highlight");
+    north2.classList.add("highlight");
+    north3.classList.add("highlight");
   });
 
   this.players = players;
   this.gridSquares = document.querySelectorAll("#mapBox > div");
+  this.currentPlayer = null;
 };
 
 exports.default = Game;
 
 _defineProperty(Game, "map", function (selector, tiles) {
+  var column = 0;
+  var row = 1;
+
   for (var tile = 0; tile < tiles; tile++) {
-    document.querySelector(selector).innerHTML += "<div data-row=\"".concat(1, "\" data-column=\"", 1, "\" class=\"gameBox\"></div>");
+    column++;
+    document.querySelector(selector).innerHTML += "<div data-row=\"".concat(row, "\" data-column=\"").concat(column, "\"></div>");
+
+    if (column === 9) {
+      row++;
+      column = 0;
+    }
   }
 });
 },{"./assets":"js/assets.js"}],"js/app.js":[function(require,module,exports) {
@@ -374,7 +445,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "36121" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40401" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

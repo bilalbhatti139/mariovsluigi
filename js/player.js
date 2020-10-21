@@ -15,6 +15,7 @@ class Player {
         image: `<img src="${this.weapon}" alt="${this.name}" width="70"/>`,
         damage: 10,
       },
+      location: { row: 0, column: 0 },
       shield: false,
     };
   };

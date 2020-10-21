@@ -25,12 +25,12 @@ body {
   position: relative;
 }
 
-.gameBox {
+#mapBox > div {
   border: 1px solid #ffffff;
   background: #ff5768;
 }
 
-.gameBox:nth-child(even) {
+#mapBox > div:nth-child(even) {
   background: #63d532;
 }
 
@@ -38,6 +38,9 @@ body {
   background: #fff;
   border-radius: 8px;
   border: 1px solid #ccc;
+}
+.scoreBoard.active {
+  box-shadow: 0 0 10px red;
 }
 
 .new-game {
