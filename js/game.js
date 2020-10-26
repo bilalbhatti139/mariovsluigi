@@ -59,11 +59,11 @@ export default class Game {
     });
 
     for (let i = 0; i < 15; i++) {
-      this.placeItem(`<img src="${goomba}" width="70" />`, "obstacle");
+      this.placeItem(`<img src="${goomba}" width="50" />`, "obstacle");
     }
 
-    this.placeItem(`<img src="${knife}" width="70" />`, "weapon");
-    this.placeItem(`<img src="${bomb}" width="70" />`, "weapon");
+    this.placeItem(`<img src="${knife}" width="50" />`, "weapon");
+    this.placeItem(`<img src="${bomb}" width="50" />`, "weapon");
 
     this.currentPlayer = this.players[
       Math.floor(Math.random() * this.players.length)
@@ -100,7 +100,6 @@ export default class Game {
 
   detectTurn = () => {
     const panel = document.querySelector(`#player${this.currentPlayer.id}`);
-    console.log(panel);
 
     panel.classList.add("active");
 
@@ -108,6 +107,7 @@ export default class Game {
   };
 
   playerMoves = () => {
+    // north direction
     const north1 = document.querySelector(
       `[data-row="${this.currentPlayer.location.row - 1}"][data-column="${
         this.currentPlayer.location.column
@@ -124,8 +124,72 @@ export default class Game {
       }"]`
     );
 
+    // south direction
+    const south1 = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row + 1}"][data-column="${
+        this.currentPlayer.location.column
+      }"]`
+    );
+    const south2 = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row + 2}"][data-column="${
+        this.currentPlayer.location.column
+      }"]`
+    );
+    const south3 = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row + 3}"][data-column="${
+        this.currentPlayer.location.column
+      }"]`
+    );
+    console.log("I am northhhhh", this.currentPlayer.location.row + 2);
+
+    // west direction
+    const west1 = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row}"][data-column="${
+        this.currentPlayer.location.column - 1
+      }"]`
+    );
+    const west2 = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row}"][data-column="${
+        this.currentPlayer.location.column - 2
+      }"]`
+    );
+    const west3 = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row}"][data-column="${
+        this.currentPlayer.location.column - 3
+      }"]`
+    );
+
+    // east direction
+    const east1 = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row}"][data-column="${
+        this.currentPlayer.location.column + 1
+      }"]`
+    );
+    const east2 = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row}"][data-column="${
+        this.currentPlayer.location.column + 2
+      }"]`
+    );
+    const east3 = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row}"][data-column="${
+        this.currentPlayer.location.column + 3
+      }"]`
+    );
+
     north1.classList.add("highlight");
     north2.classList.add("highlight");
     north3.classList.add("highlight");
+
+    south1.classList.add("highlight");
+    south2.classList.add("highlight");
+    south3.classList.add("highlight");
+
+    east1.classList.add("highlight");
+    east2.classList.add("highlight");
+    east3.classList.add("highlight");
+
+    west1.classList.add("highlight");
+    west2.classList.add("highlight");
+    west3.classList.add("highlight");
   };
 }

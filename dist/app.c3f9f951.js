@@ -140,7 +140,7 @@ var Player = function Player(name, image, weapon) {
     return {
       id: _this.id,
       name: _this.name,
-      image: "<img src=\"".concat(_this.image, "\" alt=\"").concat(_this.name, "\" width=\"70\"/>"),
+      image: "<img src=\"".concat(_this.image, "\" alt=\"").concat(_this.name, "\" width=\"50\"/>"),
       health: 100,
       weapon: {
         image: "<img src=\"".concat(_this.weapon, "\" alt=\"").concat(_this.name, "\" width=\"70\"/>"),
@@ -321,12 +321,12 @@ var Game = function Game(players) {
     });
 
     for (var i = 0; i < 15; i++) {
-      _this.placeItem("<img src=\"".concat(_assets.goomba, "\" width=\"70\" />"), "obstacle");
+      _this.placeItem("<img src=\"".concat(_assets.goomba, "\" width=\"50\" />"), "obstacle");
     }
 
-    _this.placeItem("<img src=\"".concat(_assets.knife, "\" width=\"70\" />"), "weapon");
+    _this.placeItem("<img src=\"".concat(_assets.knife, "\" width=\"50\" />"), "weapon");
 
-    _this.placeItem("<img src=\"".concat(_assets.bomb, "\" width=\"70\" />"), "weapon");
+    _this.placeItem("<img src=\"".concat(_assets.bomb, "\" width=\"50\" />"), "weapon");
 
     _this.currentPlayer = _this.players[Math.floor(Math.random() * _this.players.length)];
 
@@ -363,19 +363,41 @@ var Game = function Game(players) {
 
   _defineProperty(this, "detectTurn", function () {
     var panel = document.querySelector("#player".concat(_this.currentPlayer.id));
-    console.log(panel);
     panel.classList.add("active");
 
     _this.playerMoves();
   });
 
   _defineProperty(this, "playerMoves", function () {
+    // north direction
     var north1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 1, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
     var north2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 2, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
-    var north3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 3, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
+    var north3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 3, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]")); // south direction
+
+    var south1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row + 1, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
+    var south2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row + 2, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
+    var south3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row + 3, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
+    console.log("I am northhhhh", _this.currentPlayer.location.row + 2); // west direction
+
+    var west1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column - 1, "\"]"));
+    var west2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column - 2, "\"]"));
+    var west3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column - 3, "\"]")); // east direction
+
+    var east1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column + 1, "\"]"));
+    var east2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column + 2, "\"]"));
+    var east3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column + 3, "\"]"));
     north1.classList.add("highlight");
     north2.classList.add("highlight");
     north3.classList.add("highlight");
+    south1.classList.add("highlight");
+    south2.classList.add("highlight");
+    south3.classList.add("highlight");
+    east1.classList.add("highlight");
+    east2.classList.add("highlight");
+    east3.classList.add("highlight");
+    west1.classList.add("highlight");
+    west2.classList.add("highlight");
+    west3.classList.add("highlight");
   });
 
   this.players = players;
@@ -445,7 +467,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "40401" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "41539" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

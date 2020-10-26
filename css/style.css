@@ -26,12 +26,14 @@ body {
 }
 
 #mapBox > div {
-  border: 1px solid #ffffff;
-  background: #ff5768;
+  border: 1px solid #ccc;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-#mapBox > div:nth-child(even) {
-  background: #63d532;
+#mapBox .highlight {
+  background: blue;
 }
 
 .scoreBoard {
@@ -39,6 +41,7 @@ body {
   border-radius: 8px;
   border: 1px solid #ccc;
 }
+
 .scoreBoard.active {
   box-shadow: 0 0 10px red;
 }
