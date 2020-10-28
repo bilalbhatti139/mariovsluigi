@@ -143,7 +143,7 @@ var Player = function Player(name, image, weapon) {
       image: "<img src=\"".concat(_this.image, "\" alt=\"").concat(_this.name, "\" width=\"50\"/>"),
       health: 100,
       weapon: {
-        image: "<img src=\"".concat(_this.weapon, "\" alt=\"").concat(_this.name, "\" width=\"70\"/>"),
+        image: "<img src=\"".concat(_this.weapon, "\" alt=\"").concat(_this.name, "\" width=\"70\" data-damage=\"10\" />"),
         damage: 10
       },
       location: {
@@ -324,9 +324,9 @@ var Game = function Game(players) {
       _this.placeItem("<img src=\"".concat(_assets.goomba, "\" width=\"50\" />"), "obstacle");
     }
 
-    _this.placeItem("<img src=\"".concat(_assets.knife, "\" width=\"50\" />"), "weapon");
+    _this.placeItem("<img src=\"".concat(_assets.knife, "\" width=\"50\" data-damage=\"15\" />"), "weapon");
 
-    _this.placeItem("<img src=\"".concat(_assets.bomb, "\" width=\"50\" />"), "weapon");
+    _this.placeItem("<img src=\"".concat(_assets.bomb, "\" width=\"50\" data-damage=\"20\" />"), "weapon");
 
     _this.currentPlayer = _this.players[Math.floor(Math.random() * _this.players.length)];
 
@@ -361,43 +361,138 @@ var Game = function Game(players) {
     }
   });
 
-  _defineProperty(this, "detectTurn", function () {
-    var panel = document.querySelector("#player".concat(_this.currentPlayer.id));
-    panel.classList.add("active");
-
-    _this.playerMoves();
-  });
-
   _defineProperty(this, "playerMoves", function () {
     // north direction
     var north1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 1, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
     var north2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 2, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
     var north3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 3, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]")); // south direction
 
-    var south1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row + 1, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
-    var south2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row + 2, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
-    var south3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row + 3, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
-    console.log("I am northhhhh", _this.currentPlayer.location.row + 2); // west direction
+    var south1 = document.querySelector("[data-row=\"".concat(Number(_this.currentPlayer.location.row) + 1, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
+    var south2 = document.querySelector("[data-row=\"".concat(Number(_this.currentPlayer.location.row) + 2, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
+    var south3 = document.querySelector("[data-row=\"".concat(Number(_this.currentPlayer.location.row) + 3, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]")); // west direction
 
     var west1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column - 1, "\"]"));
     var west2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column - 2, "\"]"));
     var west3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column - 3, "\"]")); // east direction
 
-    var east1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column + 1, "\"]"));
-    var east2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column + 2, "\"]"));
-    var east3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column + 3, "\"]"));
-    north1.classList.add("highlight");
-    north2.classList.add("highlight");
-    north3.classList.add("highlight");
-    south1.classList.add("highlight");
-    south2.classList.add("highlight");
-    south3.classList.add("highlight");
-    east1.classList.add("highlight");
-    east2.classList.add("highlight");
-    east3.classList.add("highlight");
-    west1.classList.add("highlight");
-    west2.classList.add("highlight");
-    west3.classList.add("highlight");
+    var east1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(Number(_this.currentPlayer.location.column) + 1, "\"]"));
+    var east2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(Number(_this.currentPlayer.location.column) + 2, "\"]"));
+    var east3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(Number(_this.currentPlayer.location.column) + 3, "\"]"));
+
+    if (north1 && !north1.classList.contains("obstacle") && !north1.classList.contains("player")) {
+      north1.classList.add("highlight");
+      north1.addEventListener("click", _this.movePlayer);
+
+      if (north2 && !north2.classList.contains("obstacle")) {
+        north2.classList.add("highlight");
+        north2.addEventListener("click", _this.movePlayer);
+
+        if (north3 && !north3.classList.contains("obstacle")) {
+          north3.classList.add("highlight");
+          north3.addEventListener("click", _this.movePlayer);
+        }
+      }
+    }
+
+    if (south1 && !south1.classList.contains("obstacle")) {
+      south1.classList.add("highlight");
+
+      if (south2 && !south2.classList.contains("obstacle")) {
+        south2.classList.add("highlight");
+
+        if (south3 && !south3.classList.contains("obstacle")) {
+          south3.classList.add("highlight");
+        }
+      }
+    }
+
+    if (east1 && !east1.classList.contains("obstacle")) {
+      east1.classList.add("highlight");
+
+      if (east2 && !east2.classList.contains("obstacle")) {
+        east2.classList.add("highlight");
+
+        if (east3 && !east3.classList.contains("obstacle")) {
+          east3.classList.add("highlight");
+        }
+      }
+    }
+
+    if (west1 && !west1.classList.contains("obstacle")) {
+      west1.classList.add("highlight");
+
+      if (west2 && !west2.classList.contains("obstacle")) {
+        west2.classList.add("highlight");
+
+        if (west3 && !west3.classList.contains("obstacle")) {
+          west3.classList.add("highlight");
+        }
+      }
+    }
+  });
+
+  _defineProperty(this, "movePlayer", function (e) {
+    // Remove player image from old position
+    var oldPos = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]")); // Check if any weapon is in memory
+
+    if (_this.currentPlayer.weapon.old) {
+      oldPos.innerHTML = _this.currentPlayer.weapon.old;
+    } else {
+      oldPos.innerHTML = "";
+    } // Add player image to new position
+
+
+    var newPos = document.querySelector("[data-row=\"".concat(e.target.dataset.row, "\"][data-column=\"").concat(e.target.dataset.column, "\"]"));
+    /* 
+      - Check for a weapon in new position
+      
+      -- if weapon available
+      --- Keep old weapon in memory
+      --- Update current player weapon object.
+      --- Update current player panel (image and damage)
+      --- 
+    */
+
+    newPos.innerHTML = _this.currentPlayer.image; // Update new player position
+
+    _this.players[_this.currentPlayer.id - 1].location = {
+      row: e.target.dataset.row,
+      column: e.target.dataset.column
+    }; // Remove highlights
+
+    var _iterator2 = _createForOfIteratorHelper(document.querySelectorAll(".highlight")),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var tile = _step2.value;
+        tile.classList.remove("highlight");
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+
+    _this.changeTurn();
+  });
+
+  _defineProperty(this, "detectTurn", function () {
+    var panel = document.querySelector("#player".concat(_this.currentPlayer.id));
+    document.querySelector(".scoreBoard").classList.remove("active");
+    panel.classList.add("active");
+
+    _this.playerMoves();
+  });
+
+  _defineProperty(this, "changeTurn", function () {
+    if (_this.currentPlayer.id === 1) {
+      _this.currentPlayer = _this.players[1];
+    } else {
+      _this.currentPlayer = _this.players[0];
+    }
+
+    _this.detectTurn();
   });
 
   this.players = players;
@@ -467,7 +562,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "41539" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "44955" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

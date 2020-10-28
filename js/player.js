@@ -12,7 +12,7 @@ class Player {
       image: `<img src="${this.image}" alt="${this.name}" width="50"/>`,
       health: 100,
       weapon: {
-        image: `<img src="${this.weapon}" alt="${this.name}" width="70"/>`,
+        image: `<img src="${this.weapon}" alt="${this.name}" width="70" data-damage="10" />`,
         damage: 10,
       },
       location: { row: 0, column: 0 },
