@@ -144,7 +144,8 @@ var Player = function Player(name, image, weapon) {
       health: 100,
       weapon: {
         image: "<img src=\"".concat(_this.weapon, "\" alt=\"").concat(_this.name, "\" width=\"70\" data-damage=\"10\" />"),
-        damage: 10
+        damage: 10,
+        old: null
       },
       location: {
         row: 0,
@@ -362,7 +363,8 @@ var Game = function Game(players) {
   });
 
   _defineProperty(this, "playerMoves", function () {
-    // north direction
+    console.log(_this.currentPlayer); // north direction
+
     var north1 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 1, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
     var north2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 2, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]"));
     var north3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row - 3, "\"][data-column=\"").concat(_this.currentPlayer.location.column, "\"]")); // south direction
@@ -379,7 +381,7 @@ var Game = function Game(players) {
     var east2 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(Number(_this.currentPlayer.location.column) + 2, "\"]"));
     var east3 = document.querySelector("[data-row=\"".concat(_this.currentPlayer.location.row, "\"][data-column=\"").concat(Number(_this.currentPlayer.location.column) + 3, "\"]"));
 
-    if (north1 && !north1.classList.contains("obstacle") && !north1.classList.contains("player")) {
+    if (north1 && (!north1.classList.contains("obstacle") || !north1.classList.contains("player"))) {
       north1.classList.add("highlight");
       north1.addEventListener("click", _this.movePlayer);
 
@@ -396,39 +398,50 @@ var Game = function Game(players) {
 
     if (south1 && !south1.classList.contains("obstacle")) {
       south1.classList.add("highlight");
+      south1.addEventListener("click", _this.movePlayer);
 
       if (south2 && !south2.classList.contains("obstacle")) {
         south2.classList.add("highlight");
+        south2.addEventListener("click", _this.movePlayer);
 
         if (south3 && !south3.classList.contains("obstacle")) {
           south3.classList.add("highlight");
+          south3.addEventListener("click", _this.movePlayer);
         }
       }
     }
 
     if (east1 && !east1.classList.contains("obstacle")) {
       east1.classList.add("highlight");
+      east1.addEventListener("click", _this.movePlayer);
 
       if (east2 && !east2.classList.contains("obstacle")) {
         east2.classList.add("highlight");
+        east2.addEventListener("click", _this.movePlayer);
 
         if (east3 && !east3.classList.contains("obstacle")) {
           east3.classList.add("highlight");
+          east3.addEventListener("click", _this.movePlayer);
         }
       }
     }
 
     if (west1 && !west1.classList.contains("obstacle")) {
       west1.classList.add("highlight");
+      west1.addEventListener("click", _this.movePlayer);
 
       if (west2 && !west2.classList.contains("obstacle")) {
         west2.classList.add("highlight");
+        west2.addEventListener("click", _this.movePlayer);
 
         if (west3 && !west3.classList.contains("obstacle")) {
           west3.classList.add("highlight");
+          west3.addEventListener("click", _this.movePlayer);
         }
       }
     }
+
+    console.log("playerMoves");
   });
 
   _defineProperty(this, "movePlayer", function (e) {
@@ -437,12 +450,29 @@ var Game = function Game(players) {
 
     if (_this.currentPlayer.weapon.old) {
       oldPos.innerHTML = _this.currentPlayer.weapon.old;
+      _this.players[_this.currentPlayer.id - 1].weapon.old = null;
     } else {
       oldPos.innerHTML = "";
     } // Add player image to new position
 
 
-    var newPos = document.querySelector("[data-row=\"".concat(e.target.dataset.row, "\"][data-column=\"").concat(e.target.dataset.column, "\"]"));
+    var newPos;
+
+    if (e.target.nodeName !== "IMG") {
+      newPos = document.querySelector("[data-row=\"".concat(e.target.dataset.row, "\"][data-column=\"").concat(e.target.dataset.column, "\"]")); // Update new player position
+
+      _this.players[_this.currentPlayer.id - 1].location = {
+        row: e.target.dataset.row,
+        column: e.target.dataset.column
+      };
+    } else {
+      newPos = document.querySelector("[data-row=\"".concat(e.path[1].dataset.row, "\"][data-column=\"").concat(e.path[1].dataset.column, "\"]")); // Update new player position
+
+      _this.players[_this.currentPlayer.id - 1].location = {
+        row: e.path[1].dataset.row,
+        column: e.path[1].dataset.column
+      };
+    }
     /* 
       - Check for a weapon in new position
       
@@ -453,12 +483,16 @@ var Game = function Game(players) {
       --- 
     */
 
-    newPos.innerHTML = _this.currentPlayer.image; // Update new player position
 
-    _this.players[_this.currentPlayer.id - 1].location = {
-      row: e.target.dataset.row,
-      column: e.target.dataset.column
-    }; // Remove highlights
+    if (newPos.classList.contains("weapon")) {
+      _this.players[_this.currentPlayer.id - 1].weapon.old = _this.currentPlayer.weapon.image;
+      _this.players[_this.currentPlayer.id - 1].weapon.image = newPos.innerHTML;
+      _this.players[_this.currentPlayer.id - 1].weapon.damage = e.target.dataset.damage;
+      document.querySelector("#p".concat(_this.currentPlayer.id, "-weapon")).innerHTML = newPos.innerHTML;
+      document.querySelector("#p".concat(_this.currentPlayer.id, "-damage")).innerHTML = e.target.dataset.damage;
+    }
+
+    newPos.innerHTML = _this.currentPlayer.image; // Remove highlights
 
     var _iterator2 = _createForOfIteratorHelper(document.querySelectorAll(".highlight")),
         _step2;
@@ -479,7 +513,21 @@ var Game = function Game(players) {
 
   _defineProperty(this, "detectTurn", function () {
     var panel = document.querySelector("#player".concat(_this.currentPlayer.id));
-    document.querySelector(".scoreBoard").classList.remove("active");
+
+    var _iterator3 = _createForOfIteratorHelper(document.querySelectorAll(".scoreBoard")),
+        _step3;
+
+    try {
+      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+        var scoreBoard = _step3.value;
+        scoreBoard.classList.remove("active");
+      }
+    } catch (err) {
+      _iterator3.e(err);
+    } finally {
+      _iterator3.f();
+    }
+
     panel.classList.add("active");
 
     _this.playerMoves();
@@ -562,7 +610,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "44955" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "43371" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -105,6 +105,7 @@ export default class Game {
   };
 
   playerMoves = () => {
+    console.log(this.currentPlayer);
     // north direction
     const north1 = document.querySelector(
       `[data-row="${this.currentPlayer.location.row - 1}"][data-column="${
@@ -176,8 +177,8 @@ export default class Game {
 
     if (
       north1 &&
-      !north1.classList.contains("obstacle") &&
-      !north1.classList.contains("player")
+      (!north1.classList.contains("obstacle") ||
+        !north1.classList.contains("player"))
     ) {
       north1.classList.add("highlight");
       north1.addEventListener("click", this.movePlayer);
@@ -195,39 +196,50 @@ export default class Game {
 
     if (south1 && !south1.classList.contains("obstacle")) {
       south1.classList.add("highlight");
+      south1.addEventListener("click", this.movePlayer);
 
       if (south2 && !south2.classList.contains("obstacle")) {
         south2.classList.add("highlight");
+        south2.addEventListener("click", this.movePlayer);
 
         if (south3 && !south3.classList.contains("obstacle")) {
           south3.classList.add("highlight");
+          south3.addEventListener("click", this.movePlayer);
         }
       }
     }
 
     if (east1 && !east1.classList.contains("obstacle")) {
       east1.classList.add("highlight");
+      east1.addEventListener("click", this.movePlayer);
 
       if (east2 && !east2.classList.contains("obstacle")) {
         east2.classList.add("highlight");
+        east2.addEventListener("click", this.movePlayer);
 
         if (east3 && !east3.classList.contains("obstacle")) {
           east3.classList.add("highlight");
+          east3.addEventListener("click", this.movePlayer);
         }
       }
     }
 
     if (west1 && !west1.classList.contains("obstacle")) {
       west1.classList.add("highlight");
+      west1.addEventListener("click", this.movePlayer);
 
       if (west2 && !west2.classList.contains("obstacle")) {
         west2.classList.add("highlight");
+        west2.addEventListener("click", this.movePlayer);
 
         if (west3 && !west3.classList.contains("obstacle")) {
           west3.classList.add("highlight");
+          west3.addEventListener("click", this.movePlayer);
         }
       }
     }
+
+    console.log("playerMoves");
   };
 
   movePlayer = (e) => {
@@ -239,14 +251,35 @@ export default class Game {
     // Check if any weapon is in memory
     if (this.currentPlayer.weapon.old) {
       oldPos.innerHTML = this.currentPlayer.weapon.old;
+      this.players[this.currentPlayer.id - 1].weapon.old = null;
     } else {
       oldPos.innerHTML = "";
     }
 
     // Add player image to new position
-    const newPos = document.querySelector(
-      `[data-row="${e.target.dataset.row}"][data-column="${e.target.dataset.column}"]`
-    );
+    let newPos;
+
+    if (e.target.nodeName !== "IMG") {
+      newPos = document.querySelector(
+        `[data-row="${e.target.dataset.row}"][data-column="${e.target.dataset.column}"]`
+      );
+
+      // Update new player position
+      this.players[this.currentPlayer.id - 1].location = {
+        row: e.target.dataset.row,
+        column: e.target.dataset.column,
+      };
+    } else {
+      newPos = document.querySelector(
+        `[data-row="${e.path[1].dataset.row}"][data-column="${e.path[1].dataset.column}"]`
+      );
+
+      // Update new player position
+      this.players[this.currentPlayer.id - 1].location = {
+        row: e.path[1].dataset.row,
+        column: e.path[1].dataset.column,
+      };
+    }
 
     /* 
       - Check for a weapon in new position
@@ -258,13 +291,22 @@ export default class Game {
       --- 
     */
 
-    newPos.innerHTML = this.currentPlayer.image;
+    if (newPos.classList.contains("weapon")) {
+      this.players[
+        this.currentPlayer.id - 1
+      ].weapon.old = this.currentPlayer.weapon.image;
+      this.players[this.currentPlayer.id - 1].weapon.image = newPos.innerHTML;
+      this.players[this.currentPlayer.id - 1].weapon.damage =
+        e.target.dataset.damage;
 
-    // Update new player position
-    this.players[this.currentPlayer.id - 1].location = {
-      row: e.target.dataset.row,
-      column: e.target.dataset.column,
-    };
+      document.querySelector(`#p${this.currentPlayer.id}-weapon`).innerHTML =
+        newPos.innerHTML;
+
+      document.querySelector(`#p${this.currentPlayer.id}-damage`).innerHTML =
+        e.target.dataset.damage;
+    }
+
+    newPos.innerHTML = this.currentPlayer.image;
 
     // Remove highlights
     for (const tile of document.querySelectorAll(".highlight")) {
@@ -277,7 +319,9 @@ export default class Game {
   detectTurn = () => {
     const panel = document.querySelector(`#player${this.currentPlayer.id}`);
 
-    document.querySelector(".scoreBoard").classList.remove("active");
+    for (const scoreBoard of document.querySelectorAll(".scoreBoard")) {
+      scoreBoard.classList.remove("active");
+    }
 
     panel.classList.add("active");
 
