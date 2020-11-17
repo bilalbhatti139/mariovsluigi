@@ -177,69 +177,111 @@ export default class Game {
 
     if (
       north1 &&
-      (!north1.classList.contains("obstacle") ||
-        !north1.classList.contains("player"))
+      !north1.classList.contains("obstacle") &&
+      !north1.classList.contains("player")
     ) {
       north1.classList.add("highlight");
       north1.addEventListener("click", this.movePlayer);
 
-      if (north2 && !north2.classList.contains("obstacle")) {
+      if (
+        north2 &&
+        !north2.classList.contains("obstacle") &&
+        !north2.classList.contains("player")
+      ) {
         north2.classList.add("highlight");
         north2.addEventListener("click", this.movePlayer);
 
-        if (north3 && !north3.classList.contains("obstacle")) {
+        if (
+          north3 &&
+          !north3.classList.contains("obstacle") &&
+          !north3.classList.contains("player")
+        ) {
           north3.classList.add("highlight");
           north3.addEventListener("click", this.movePlayer);
         }
       }
     }
 
-    if (south1 && !south1.classList.contains("obstacle")) {
+    if (
+      south1 &&
+      !south1.classList.contains("obstacle") &&
+      !south1.classList.contains("player")
+    ) {
       south1.classList.add("highlight");
       south1.addEventListener("click", this.movePlayer);
 
-      if (south2 && !south2.classList.contains("obstacle")) {
+      if (
+        south2 &&
+        !south2.classList.contains("obstacle") &&
+        !south2.classList.contains("player")
+      ) {
         south2.classList.add("highlight");
         south2.addEventListener("click", this.movePlayer);
 
-        if (south3 && !south3.classList.contains("obstacle")) {
+        if (
+          south3 &&
+          !south3.classList.contains("obstacle") &&
+          !south3.classList.contains("player")
+        ) {
           south3.classList.add("highlight");
           south3.addEventListener("click", this.movePlayer);
         }
       }
     }
 
-    if (east1 && !east1.classList.contains("obstacle")) {
+    if (
+      east1 &&
+      !east1.classList.contains("obstacle") &&
+      !east1.classList.contains("player")
+    ) {
       east1.classList.add("highlight");
       east1.addEventListener("click", this.movePlayer);
 
-      if (east2 && !east2.classList.contains("obstacle")) {
+      if (
+        east2 &&
+        !east2.classList.contains("obstacle") &&
+        !east2.classList.contains("player")
+      ) {
         east2.classList.add("highlight");
         east2.addEventListener("click", this.movePlayer);
 
-        if (east3 && !east3.classList.contains("obstacle")) {
+        if (
+          east3 &&
+          !east3.classList.contains("obstacle") &&
+          !east3.classList.contains("player")
+        ) {
           east3.classList.add("highlight");
           east3.addEventListener("click", this.movePlayer);
         }
       }
     }
 
-    if (west1 && !west1.classList.contains("obstacle")) {
+    if (
+      west1 &&
+      !west1.classList.contains("obstacle") &&
+      !west1.classList.contains("player")
+    ) {
       west1.classList.add("highlight");
       west1.addEventListener("click", this.movePlayer);
 
-      if (west2 && !west2.classList.contains("obstacle")) {
+      if (
+        west2 &&
+        !west2.classList.contains("obstacle") &&
+        !west2.classList.contains("player")
+      ) {
         west2.classList.add("highlight");
         west2.addEventListener("click", this.movePlayer);
 
-        if (west3 && !west3.classList.contains("obstacle")) {
+        if (
+          west3 &&
+          !west3.classList.contains("obstacle") &&
+          !west3.classList.contains("player")
+        ) {
           west3.classList.add("highlight");
           west3.addEventListener("click", this.movePlayer);
         }
       }
     }
-
-    console.log("playerMoves");
   };
 
   movePlayer = (e) => {
@@ -247,6 +289,8 @@ export default class Game {
     const oldPos = document.querySelector(
       `[data-row="${this.currentPlayer.location.row}"][data-column="${this.currentPlayer.location.column}"]`
     );
+
+    const newPos = e.target.nodeName === "IMG" ? e.path[1] : e.target;
 
     // Check if any weapon is in memory
     if (this.currentPlayer.weapon.old) {
@@ -256,40 +300,13 @@ export default class Game {
       oldPos.innerHTML = "";
     }
 
-    // Add player image to new position
-    let newPos;
+    oldPos.classList.remove("player");
 
-    if (e.target.nodeName !== "IMG") {
-      newPos = document.querySelector(
-        `[data-row="${e.target.dataset.row}"][data-column="${e.target.dataset.column}"]`
-      );
-
-      // Update new player position
-      this.players[this.currentPlayer.id - 1].location = {
-        row: e.target.dataset.row,
-        column: e.target.dataset.column,
-      };
-    } else {
-      newPos = document.querySelector(
-        `[data-row="${e.path[1].dataset.row}"][data-column="${e.path[1].dataset.column}"]`
-      );
-
-      // Update new player position
-      this.players[this.currentPlayer.id - 1].location = {
-        row: e.path[1].dataset.row,
-        column: e.path[1].dataset.column,
-      };
-    }
-
-    /* 
-      - Check for a weapon in new position
-      
-      -- if weapon available
-      --- Keep old weapon in memory
-      --- Update current player weapon object.
-      --- Update current player panel (image and damage)
-      --- 
-    */
+    // Update new player position
+    this.players[this.currentPlayer.id - 1].location = {
+      row: newPos.dataset.row,
+      column: newPos.dataset.column,
+    };
 
     if (newPos.classList.contains("weapon")) {
       this.players[
@@ -306,15 +323,61 @@ export default class Game {
         e.target.dataset.damage;
     }
 
+    // Add player image to new position
     newPos.innerHTML = this.currentPlayer.image;
+    newPos.classList.add("player");
 
     // Remove highlights
     for (const tile of document.querySelectorAll(".highlight")) {
       tile.classList.remove("highlight");
+      tile.removeEventListener("click", this.movePlayer);
     }
 
-    this.changeTurn();
+    const isFighting = !!this.detectFight();
+
+    console.log({ isFighting });
+
+    if (isFighting) {
+      this.retaliation()
+    } else {
+      this.changeTurn();
+    }
   };
+
+  detectFight = () => {
+    const north = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row - 1}"][data-column="${
+        this.currentPlayer.location.column
+      }"]`
+    );
+
+    const west = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row}"][data-column="${
+        this.currentPlayer.location.column - 1
+      }"]`
+    );
+
+    const east = document.querySelector(
+      `[data-row="${this.currentPlayer.location.row}"][data-column="${
+        Number(this.currentPlayer.location.column) + 1
+      }"]`
+    );
+
+    const south = document.querySelector(
+      `[data-row="${
+        Number(this.currentPlayer.location.row) + 1
+      }"][data-column="${this.currentPlayer.location.column}"]`
+    );
+
+    if (north && north.classList.contains("player")) return true;
+    if (south && south.classList.contains("player")) return true;
+    if (east && east.classList.contains("player")) return true;
+    if (west && west.classList.contains("player")) return true;
+  };
+
+  retaliation = () => {
+    console.log("Lets start a fight...");
+  }
 
   detectTurn = () => {
     const panel = document.querySelector(`#player${this.currentPlayer.id}`);
