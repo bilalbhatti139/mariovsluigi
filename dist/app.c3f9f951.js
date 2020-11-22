@@ -512,7 +512,28 @@ var Game = function Game(players) {
   });
 
   _defineProperty(this, "retaliation", function () {
-    console.log("Lets start a fight...");
+    console.log("Lets start a fight..."); // 1. Display retaliation modal
+
+    document.querySelector("#fightModal").classList.add("open"); // 2. Decreasing health of opposite member
+
+    if (_this.currentPlayer.id === 1) {
+      var newHealth = _this.players[1].health - _this.currentPlayer.weapon.damage;
+      _this.players[1].health = newHealth;
+      document.querySelector("#p2-health").innerHTML = newHealth;
+
+      if (_this.players[1].health <= 0) {
+        document.querySelector("#gameOverModal").classList.add("open");
+      }
+    } else {
+      var _newHealth = _this.players[0].health - _this.currentPlayer.weapon.damage;
+
+      _this.players[0].health = _newHealth;
+      document.querySelector("#p1-health").innerHTML = _newHealth;
+
+      if (_this.players[0].health <= 0) {
+        document.querySelector("#gameOverModal").classList.add("open");
+      }
+    }
   });
 
   _defineProperty(this, "detectTurn", function () {
@@ -614,7 +635,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "37545" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "34139" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

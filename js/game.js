@@ -338,7 +338,7 @@ export default class Game {
     console.log({ isFighting });
 
     if (isFighting) {
-      this.retaliation()
+      this.retaliation();
     } else {
       this.changeTurn();
     }
@@ -377,7 +377,29 @@ export default class Game {
 
   retaliation = () => {
     console.log("Lets start a fight...");
-  }
+    // 1. Display retaliation modal
+    document.querySelector("#fightModal").classList.add("open");
+    // 2. Decreasing health of opposite member
+    if (this.currentPlayer.id === 1) {
+      const newHealth =
+        this.players[1].health - this.currentPlayer.weapon.damage;
+      this.players[1].health = newHealth;
+      document.querySelector("#p2-health").innerHTML = newHealth;
+
+      if (this.players[1].health <= 0) {
+        document.querySelector("#gameOverModal").classList.add("open");
+      }
+    } else {
+      const newHealth =
+        this.players[0].health - this.currentPlayer.weapon.damage;
+      this.players[0].health = newHealth;
+      document.querySelector("#p1-health").innerHTML = newHealth;
+
+      if (this.players[0].health <= 0) {
+        document.querySelector("#gameOverModal").classList.add("open");
+      }
+    }
+  };
 
   detectTurn = () => {
     const panel = document.querySelector(`#player${this.currentPlayer.id}`);
