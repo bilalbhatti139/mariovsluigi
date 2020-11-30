@@ -135,5 +135,13 @@ body {
   padding: 10px 20px;
 }
 
+.shield {
+  filter: grayscale(1);
+}
+
+.shield.protected {
+  filter: grayscale(0);
+}
+
 
 /*# sourceMappingURL=/style.78032849.css.map */

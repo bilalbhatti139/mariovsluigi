@@ -134,3 +134,11 @@ body {
   color: #ffffff;
   padding: 10px 20px;
 }
+
+.shield {
+  filter: grayscale(1);
+}
+
+.shield.protected {
+  filter: grayscale(0);
+}

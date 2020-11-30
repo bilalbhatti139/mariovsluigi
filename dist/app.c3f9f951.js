@@ -303,17 +303,17 @@ var Game = function Game(players) {
     }
 
     _this.players.map(function (player) {
-      document.querySelector("#p".concat(player.id, "-name")).innerHTML = "";
-      document.querySelector("#p".concat(player.id, "-name")).innerHTML = player.name;
-      document.querySelector("#p".concat(player.id, "-image")).innerHTML = "";
-      document.querySelector("#p".concat(player.id, "-image")).innerHTML = player.image;
-      document.querySelector("#p".concat(player.id, "-health-image")).innerHTML = "";
-      document.querySelector("#p".concat(player.id, "-health-image")).innerHTML = "<img src=\"".concat(_assets.health, "\" width=\"70\" />");
-      document.querySelector("#p".concat(player.id, "-health")).innerHTML = "";
-      document.querySelector("#p".concat(player.id, "-health")).innerHTML = player.health;
-      document.querySelector("#p".concat(player.id, "-weapon")).innerHTML = "";
-      document.querySelector("#p".concat(player.id, "-weapon")).innerHTML = player.weapon.image;
-      document.querySelector("#p".concat(player.id, "-damage")).innerHTML = "";
+      // document.querySelector(`#p${player.id}-name`).innerHTML = "";
+      document.querySelector("#p".concat(player.id, "-name")).innerHTML = player.name; // document.querySelector(`#p${player.id}-image`).innerHTML = "";
+
+      document.querySelector("#p".concat(player.id, "-image")).innerHTML = player.image; // document.querySelector(`#p${player.id}-health-image`).innerHTML = "";
+
+      document.querySelector("#p".concat(player.id, "-health-image")).innerHTML = "<img src=\"".concat(_assets.health, "\" width=\"70\" />"); // document.querySelector(`#p${player.id}-health`).innerHTML = "";
+
+      document.querySelector("#p".concat(player.id, "-health")).innerHTML = player.health; // document.querySelector(`#p${player.id}-weapon`).innerHTML = "";
+
+      document.querySelector("#p".concat(player.id, "-weapon")).innerHTML = player.weapon.image; // document.querySelector(`#p${player.id}-damage`).innerHTML = "";
+
       document.querySelector("#p".concat(player.id, "-damage")).innerHTML = player.weapon.damage;
       document.querySelector("#p".concat(player.id, "-shield")).innerHTML = player.shield ? "Protected" : "Unprotected";
       document.querySelector("#p".concat(player.id, "-shield-image")).innerHTML = "<img src=\"".concat(_assets.shield, "\" width=\"70\" />");
@@ -328,14 +328,14 @@ var Game = function Game(players) {
     _this.placeItem("<img src=\"".concat(_assets.knife, "\" width=\"50\" data-damage=\"15\" />"), "weapon");
 
     _this.placeItem("<img src=\"".concat(_assets.bomb, "\" width=\"50\" data-damage=\"20\" />"), "weapon");
-
-    _this.currentPlayer = _this.players[Math.floor(Math.random() * _this.players.length)];
-
-    _this.detectTurn();
   });
 
   _defineProperty(this, "init", function () {
     _this.reset();
+
+    _this.currentPlayer = _this.players[Math.floor(Math.random() * _this.players.length)];
+
+    _this.detectTurn();
   });
 
   _defineProperty(this, "placeItem", function (item, type) {
@@ -516,24 +516,50 @@ var Game = function Game(players) {
 
     document.querySelector("#fightModal").classList.add("open"); // 2. Decreasing health of opposite member
 
-    if (_this.currentPlayer.id === 1) {
-      var newHealth = _this.players[1].health - _this.currentPlayer.weapon.damage;
-      _this.players[1].health = newHealth;
-      document.querySelector("#p2-health").innerHTML = newHealth;
+    document.querySelector("#protect").addEventListener("click", function () {
+      var attacker = _this.currentPlayer;
 
-      if (_this.players[1].health <= 0) {
+      _this.changeTurn();
+
+      var opponent = _this.currentPlayer;
+      var newHealth = opponent.health - attacker.weapon.damage / 2;
+      opponent.health = newHealth;
+      document.querySelector("#p".concat(opponent.id, "-health")).innerHTML = newHealth;
+      document.querySelector("#p".concat(opponent.id, "-shield")).innerHTML = "Protected";
+      document.querySelector("#p".concat(opponent.id, "-shield-image")).classList.add("protected");
+      document.querySelector("#fightModal").classList.remove("open");
+
+      if (opponent.health <= 99) {
         document.querySelector("#gameOverModal").classList.add("open");
+        document.querySelector("#gameOverModal p:first-of-type").innerHTML = "".concat(attacker.name, ", you have won the game :)");
+        document.querySelector("#gameOverModal p:last-of-type").innerHTML = "".concat(opponent.name, ", you have lost the game :(");
+        document.querySelector("#gameOverModal button").addEventListener("click", function () {
+          document.querySelector("#gameOverModal").classList.remove("open");
+        });
       }
-    } else {
-      var _newHealth = _this.players[0].health - _this.currentPlayer.weapon.damage;
+    });
+    document.querySelector("#attack").addEventListener("click", function () {
+      var attacker = _this.currentPlayer;
 
-      _this.players[0].health = _newHealth;
-      document.querySelector("#p1-health").innerHTML = _newHealth;
+      _this.changeTurn();
 
-      if (_this.players[0].health <= 0) {
+      var opponent = _this.currentPlayer;
+      var newHealth = opponent.health - attacker.weapon.damage;
+      opponent.health = newHealth;
+      document.querySelector("#p".concat(opponent.id, "-health")).innerHTML = newHealth;
+      document.querySelector("#p".concat(opponent.id, "-shield")).innerHTML = "Unprotected";
+      document.querySelector("#p".concat(opponent.id, "-shield-image")).classList.remove("protected");
+      document.querySelector("#fightModal").classList.remove("open");
+
+      if (opponent.health <= 99) {
         document.querySelector("#gameOverModal").classList.add("open");
+        document.querySelector("#gameOverModal p:first-of-type").innerHTML = "".concat(attacker.name, ", you have won the game :)");
+        document.querySelector("#gameOverModal p:last-of-type").innerHTML = "".concat(opponent.name, ", you have lost the game :(");
+        document.querySelector("#gameOverModal button").addEventListener("click", function () {
+          document.querySelector("#gameOverModal").classList.remove("open");
+        });
       }
-    }
+    });
   });
 
   _defineProperty(this, "detectTurn", function () {
@@ -602,11 +628,14 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _game.default.map("#mapBox", 81);
 
-var player1 = new _player.default("Mario", _assets.mario, _assets.fire).generate();
-var player2 = new _player.default("Luigi", _assets.luigi, _assets.gun, player1.id).generate();
-var game = new _game.default([player1, player2]);
-document.querySelector("#newGame").addEventListener("click", game.init);
-game.reset();
+var newGame = function newGame() {
+  var player1 = new _player.default("Mario", _assets.mario, _assets.fire).generate();
+  var player2 = new _player.default("Luigi", _assets.luigi, _assets.gun, player1.id).generate();
+  var game = new _game.default([player1, player2]);
+  game.init();
+};
+
+document.querySelector("#newGame").addEventListener("click", newGame);
 },{"./player":"js/player.js","./game":"js/game.js","./assets":"js/assets.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -635,7 +664,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "34139" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "38447" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
