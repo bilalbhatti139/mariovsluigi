@@ -17,7 +17,6 @@ class Player {
         old: null,
       },
       location: { row: 0, column: 0 },
-      shield: false,
     };
   };
 }

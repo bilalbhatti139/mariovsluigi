@@ -150,8 +150,7 @@ var Player = function Player(name, image, weapon) {
       location: {
         row: 0,
         column: 0
-      },
-      shield: false
+      }
     };
   });
 
@@ -336,6 +335,8 @@ var Game = function Game(players) {
     _this.currentPlayer = _this.players[Math.floor(Math.random() * _this.players.length)];
 
     _this.detectTurn();
+
+    _this.playerMoves();
   });
 
   _defineProperty(this, "placeItem", function (item, type) {
@@ -512,79 +513,105 @@ var Game = function Game(players) {
   });
 
   _defineProperty(this, "retaliation", function () {
-    console.log("Lets start a fight..."); // 1. Display retaliation modal
+    var attacker = _this.currentPlayer;
+    _this.currentPlayer = _this.currentPlayer.id === 1 ? _this.players[1] : _this.players[0];
 
-    document.querySelector("#fightModal").classList.add("open"); // 2. Decreasing health of opposite member
+    _this.detectTurn();
+
+    var opponent = _this.currentPlayer;
+    console.log("Lets start a fight...", opponent.id); // 1. Display retaliation modal
+
+    setTimeout(function () {
+      document.querySelector("#fightModal").classList.add("open");
+    }, 500);
+    document.querySelector("#avatar").innerHTML = opponent.image; // 2. Decreasing health of opposite member
 
     document.querySelector("#protect").addEventListener("click", function () {
-      var attacker = _this.currentPlayer;
+      _this.playerMoves();
 
-      _this.changeTurn();
-
-      var opponent = _this.currentPlayer;
       var newHealth = opponent.health - attacker.weapon.damage / 2;
       opponent.health = newHealth;
       document.querySelector("#p".concat(opponent.id, "-health")).innerHTML = newHealth;
       document.querySelector("#p".concat(opponent.id, "-shield")).innerHTML = "Protected";
       document.querySelector("#p".concat(opponent.id, "-shield-image")).classList.add("protected");
-      document.querySelector("#fightModal").classList.remove("open");
+      setTimeout(function () {
+        document.querySelector("#fightModal").classList.remove("open");
+      }, 500);
 
-      if (opponent.health <= 99) {
-        document.querySelector("#gameOverModal").classList.add("open");
-        document.querySelector("#gameOverModal p:first-of-type").innerHTML = "".concat(attacker.name, ", you have won the game :)");
-        document.querySelector("#gameOverModal p:last-of-type").innerHTML = "".concat(opponent.name, ", you have lost the game :(");
-        document.querySelector("#gameOverModal button").addEventListener("click", function () {
-          document.querySelector("#gameOverModal").classList.remove("open");
-        });
-      }
+      _this.gameOver(opponent, attacker);
+
+      _this.players[opponent.id - 1] = opponent;
     });
     document.querySelector("#attack").addEventListener("click", function () {
-      var attacker = _this.currentPlayer;
-
-      _this.changeTurn();
-
-      var opponent = _this.currentPlayer;
+      // const attacker = this.currentPlayer;
+      // this.changeTurn(true);
+      // const opponent = this.currentPlayer;
       var newHealth = opponent.health - attacker.weapon.damage;
       opponent.health = newHealth;
       document.querySelector("#p".concat(opponent.id, "-health")).innerHTML = newHealth;
       document.querySelector("#p".concat(opponent.id, "-shield")).innerHTML = "Unprotected";
       document.querySelector("#p".concat(opponent.id, "-shield-image")).classList.remove("protected");
-      document.querySelector("#fightModal").classList.remove("open");
+      setTimeout(function () {
+        document.querySelector("#fightModal").classList.remove("open");
+      }, 500);
 
-      if (opponent.health <= 99) {
-        document.querySelector("#gameOverModal").classList.add("open");
-        document.querySelector("#gameOverModal p:first-of-type").innerHTML = "".concat(attacker.name, ", you have won the game :)");
-        document.querySelector("#gameOverModal p:last-of-type").innerHTML = "".concat(opponent.name, ", you have lost the game :(");
-        document.querySelector("#gameOverModal button").addEventListener("click", function () {
-          document.querySelector("#gameOverModal").classList.remove("open");
-        });
+      _this.gameOver(opponent, attacker);
+
+      _this.players[opponent.id - 1] = opponent; // Remove highlights
+
+      var _iterator3 = _createForOfIteratorHelper(document.querySelectorAll(".highlight")),
+          _step3;
+
+      try {
+        for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
+          var tile = _step3.value;
+          tile.classList.remove("highlight");
+          tile.removeEventListener("click", _this.movePlayer);
+        }
+      } catch (err) {
+        _iterator3.e(err);
+      } finally {
+        _iterator3.f();
       }
+
+      _this.retaliation();
     });
+  });
+
+  _defineProperty(this, "gameOver", function (opponent, attacker) {
+    if (opponent.health <= 0) {
+      document.querySelector("#gameOverModal").classList.add("open");
+      document.querySelector("#gameOverModal p:first-of-type").innerHTML = "".concat(attacker.name, ", you have won the game :)");
+      document.querySelector("#gameOverModal p:last-of-type").innerHTML = "".concat(opponent.name, ", you have lost the game :(");
+      document.querySelector("#gameOverModal button").addEventListener("click", function () {
+        document.querySelector("#gameOverModal").classList.remove("open");
+      });
+    }
   });
 
   _defineProperty(this, "detectTurn", function () {
     var panel = document.querySelector("#player".concat(_this.currentPlayer.id));
 
-    var _iterator3 = _createForOfIteratorHelper(document.querySelectorAll(".scoreBoard")),
-        _step3;
+    var _iterator4 = _createForOfIteratorHelper(document.querySelectorAll(".scoreBoard")),
+        _step4;
 
     try {
-      for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
-        var scoreBoard = _step3.value;
+      for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+        var scoreBoard = _step4.value;
         scoreBoard.classList.remove("active");
       }
     } catch (err) {
-      _iterator3.e(err);
+      _iterator4.e(err);
     } finally {
-      _iterator3.f();
+      _iterator4.f();
     }
 
     panel.classList.add("active");
-
-    _this.playerMoves();
   });
 
   _defineProperty(this, "changeTurn", function () {
+    var attack = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
+
     if (_this.currentPlayer.id === 1) {
       _this.currentPlayer = _this.players[1];
     } else {
@@ -592,6 +619,8 @@ var Game = function Game(players) {
     }
 
     _this.detectTurn();
+
+    !attack && _this.playerMoves();
   });
 
   this.players = players;
@@ -664,7 +693,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "38447" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "41047" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -80,6 +80,7 @@ export default class Game {
     ];
 
     this.detectTurn();
+    this.playerMoves();
   };
 
   placeItem = (item, type) => {
@@ -376,16 +377,25 @@ export default class Game {
   };
 
   retaliation = () => {
-    console.log("Lets start a fight...");
+    const attacker = this.currentPlayer;
+    this.currentPlayer =
+      this.currentPlayer.id === 1 ? this.players[1] : this.players[0];
+
+    this.detectTurn();
+    const opponent = this.currentPlayer;
+
+    console.log("Lets start a fight...", opponent.id);
     // 1. Display retaliation modal
-    document.querySelector("#fightModal").classList.add("open");
+    setTimeout(() => {
+      document.querySelector("#fightModal").classList.add("open");
+    }, 500);
+
+    document.querySelector("#avatar").innerHTML = opponent.image;
+
     // 2. Decreasing health of opposite member
 
     document.querySelector("#protect").addEventListener("click", () => {
-      const attacker = this.currentPlayer;
-      this.changeTurn();
-      const opponent = this.currentPlayer;
-
+      this.playerMoves();
       const newHealth = opponent.health - attacker.weapon.damage / 2;
 
       opponent.health = newHealth;
@@ -395,57 +405,64 @@ export default class Game {
         .querySelector(`#p${opponent.id}-shield-image`)
         .classList.add("protected");
 
-      document.querySelector("#fightModal").classList.remove("open");
+      setTimeout(() => {
+        document.querySelector("#fightModal").classList.remove("open");
+      }, 500);
 
-      if (opponent.health <= 99) {
-        document.querySelector("#gameOverModal").classList.add("open");
-        document.querySelector(
-          "#gameOverModal p:first-of-type"
-        ).innerHTML = `${attacker.name}, you have won the game :)`;
-        document.querySelector(
-          "#gameOverModal p:last-of-type"
-        ).innerHTML = `${opponent.name}, you have lost the game :(`;
+      this.gameOver(opponent, attacker);
 
-        document
-          .querySelector("#gameOverModal button")
-          .addEventListener("click", () => {
-            document.querySelector("#gameOverModal").classList.remove("open");
-          });
-      }
+      this.players[opponent.id - 1] = opponent;
     });
 
     document.querySelector("#attack").addEventListener("click", () => {
-      const attacker = this.currentPlayer;
-      this.changeTurn();
-      const opponent = this.currentPlayer;
+      // const attacker = this.currentPlayer;
+      // this.changeTurn(true);
+      // const opponent = this.currentPlayer;
 
       const newHealth = opponent.health - attacker.weapon.damage;
 
       opponent.health = newHealth;
       document.querySelector(`#p${opponent.id}-health`).innerHTML = newHealth;
-      document.querySelector(`#p${opponent.id}-shield`).innerHTML = "Unprotected";
+      document.querySelector(`#p${opponent.id}-shield`).innerHTML =
+        "Unprotected";
       document
         .querySelector(`#p${opponent.id}-shield-image`)
         .classList.remove("protected");
 
-      document.querySelector("#fightModal").classList.remove("open");
+      setTimeout(() => {
+        document.querySelector("#fightModal").classList.remove("open");
+      }, 500);
 
-      if (opponent.health <= 99) {
-        document.querySelector("#gameOverModal").classList.add("open");
-        document.querySelector(
-          "#gameOverModal p:first-of-type"
-        ).innerHTML = `${attacker.name}, you have won the game :)`;
-        document.querySelector(
-          "#gameOverModal p:last-of-type"
-        ).innerHTML = `${opponent.name}, you have lost the game :(`;
+      this.gameOver(opponent, attacker);
 
-        document
-          .querySelector("#gameOverModal button")
-          .addEventListener("click", () => {
-            document.querySelector("#gameOverModal").classList.remove("open");
-          });
+      this.players[opponent.id - 1] = opponent;
+
+      // Remove highlights
+      for (const tile of document.querySelectorAll(".highlight")) {
+        tile.classList.remove("highlight");
+        tile.removeEventListener("click", this.movePlayer);
       }
+
+      this.retaliation();
     });
+  };
+
+  gameOver = (opponent, attacker) => {
+    if (opponent.health <= 0) {
+      document.querySelector("#gameOverModal").classList.add("open");
+      document.querySelector(
+        "#gameOverModal p:first-of-type"
+      ).innerHTML = `${attacker.name}, you have won the game :)`;
+      document.querySelector(
+        "#gameOverModal p:last-of-type"
+      ).innerHTML = `${opponent.name}, you have lost the game :(`;
+
+      document
+        .querySelector("#gameOverModal button")
+        .addEventListener("click", () => {
+          document.querySelector("#gameOverModal").classList.remove("open");
+        });
+    }
   };
 
   detectTurn = () => {
@@ -456,11 +473,9 @@ export default class Game {
     }
 
     panel.classList.add("active");
-
-    this.playerMoves();
   };
 
-  changeTurn = () => {
+  changeTurn = (attack = false) => {
     if (this.currentPlayer.id === 1) {
       this.currentPlayer = this.players[1];
     } else {
@@ -468,5 +483,7 @@ export default class Game {
     }
 
     this.detectTurn();
+
+    !attack && this.playerMoves();
   };
 }
