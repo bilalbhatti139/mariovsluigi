@@ -30,6 +30,10 @@ export default class Game {
       tile.removeAttribute("class");
     }
 
+    for (let i = 0; i < 3; i++) {
+      this.placeItem(`<img src="${goomba}" width="50" />`, "obstacle");
+    }
+
     this.players.map((player) => {
       // document.querySelector(`#p${player.id}-name`).innerHTML = "";
       document.querySelector(`#p${player.id}-name`).innerHTML = player.name;
@@ -57,10 +61,6 @@ export default class Game {
 
       this.placeItem(player, "player");
     });
-
-    for (let i = 0; i < 15; i++) {
-      this.placeItem(`<img src="${goomba}" width="50" />`, "obstacle");
-    }
 
     this.placeItem(
       `<img src="${knife}" width="50" data-damage="15" />`,
@@ -98,6 +98,23 @@ export default class Game {
         this.gridSquares[randomSquare].innerHTML = item.image;
         const { row, column } = this.gridSquares[randomSquare].dataset;
         this.players[item.id - 1].location = { row, column };
+      } else if (type === "obstacle") {
+        const { row, column } = this.gridSquares[randomSquare].dataset;
+        //console.log("elm", this.gridSquares[randomSquare]);
+        const r = document.querySelector(`[data-row="${row}"].obstacle`);
+
+        const c = document.querySelector(`[data-column="${column}"].obstacle`);
+
+        if (r || c) {
+          console.log(
+            "sommmmmmmmmmething found",
+            this.gridSquares[randomSquare]
+          );
+          this.placeItem(item, type);
+        } else {
+          console.log("available....");
+          this.gridSquares[randomSquare].innerHTML = item;
+        }
       } else {
         this.gridSquares[randomSquare].innerHTML = item;
       }
@@ -106,7 +123,6 @@ export default class Game {
   };
 
   playerMoves = () => {
-    console.log(this.currentPlayer);
     // north direction
     const north1 = document.querySelector(
       `[data-row="${this.currentPlayer.location.row - 1}"][data-column="${
@@ -335,9 +351,6 @@ export default class Game {
     }
 
     const isFighting = !!this.detectFight();
-
-    console.log({ isFighting });
-
     if (isFighting) {
       this.retaliation();
     } else {
@@ -381,10 +394,14 @@ export default class Game {
     this.currentPlayer =
       this.currentPlayer.id === 1 ? this.players[1] : this.players[0];
 
-    this.detectTurn();
+    // await this.asyncDelay(500);
     const opponent = this.currentPlayer;
 
-    console.log("Lets start a fight...", opponent.id);
+    // Update player panels highlight
+    document.querySelector(`#player${attacker.id}`).classList.remove("active");
+    document.querySelector(`#player${opponent.id}`).classList.add("active");
+
+    // console.log("Lets start a fight...", opponent.id);
     // 1. Display retaliation modal
     setTimeout(() => {
       document.querySelector("#fightModal").classList.add("open");
@@ -394,61 +411,63 @@ export default class Game {
 
     // 2. Decreasing health of opposite member
 
-    document.querySelector("#protect").addEventListener("click", () => {
-      this.playerMoves();
-      const newHealth = opponent.health - attacker.weapon.damage / 2;
+    document.querySelector("#protect").addEventListener(
+      "click",
+      (e) => {
+        const newHealth = opponent.health - attacker.weapon.damage / 2;
 
-      opponent.health = newHealth;
-      document.querySelector(`#p${opponent.id}-health`).innerHTML = newHealth;
-      document.querySelector(`#p${opponent.id}-shield`).innerHTML = "Protected";
-      document
-        .querySelector(`#p${opponent.id}-shield-image`)
-        .classList.add("protected");
+        this.players[opponent.id - 1].health = newHealth;
+        document.querySelector(`#p${opponent.id}-health`).innerHTML = newHealth;
+        document.querySelector(`#p${opponent.id}-shield`).innerHTML =
+          "Protected";
+        document
+          .querySelector(`#p${opponent.id}-shield-image`)
+          .classList.add("protected");
 
-      setTimeout(() => {
         document.querySelector("#fightModal").classList.remove("open");
-      }, 500);
 
-      this.gameOver(opponent, attacker);
+        if (this.gameOver(opponent, attacker)) return;
 
-      this.players[opponent.id - 1] = opponent;
-    });
+        this.playerMoves();
 
-    document.querySelector("#attack").addEventListener("click", () => {
-      // const attacker = this.currentPlayer;
-      // this.changeTurn(true);
-      // const opponent = this.currentPlayer;
+        // e.target.removeEventListener('click', this.retaliation);
+      },
+      { once: true }
+    );
 
-      const newHealth = opponent.health - attacker.weapon.damage;
+    document.querySelector("#attack").addEventListener(
+      "click",
+      () => {
+        const newHealth = opponent.health - attacker.weapon.damage;
 
-      opponent.health = newHealth;
-      document.querySelector(`#p${opponent.id}-health`).innerHTML = newHealth;
-      document.querySelector(`#p${opponent.id}-shield`).innerHTML =
-        "Unprotected";
-      document
-        .querySelector(`#p${opponent.id}-shield-image`)
-        .classList.remove("protected");
+        this.players[opponent.id - 1].health = newHealth;
+        document.querySelector(`#p${opponent.id}-health`).innerHTML = newHealth;
+        document.querySelector(`#p${opponent.id}-shield`).innerHTML =
+          "Unprotected";
+        document
+          .querySelector(`#p${opponent.id}-shield-image`)
+          .classList.remove("protected");
 
-      setTimeout(() => {
         document.querySelector("#fightModal").classList.remove("open");
-      }, 500);
 
-      this.gameOver(opponent, attacker);
+        // Remove highlights
+        for (const tile of document.querySelectorAll(".highlight")) {
+          tile.classList.remove("highlight");
+          tile.removeEventListener("click", this.movePlayer);
+        }
 
-      this.players[opponent.id - 1] = opponent;
+        if (this.gameOver(opponent, attacker)) return;
 
-      // Remove highlights
-      for (const tile of document.querySelectorAll(".highlight")) {
-        tile.classList.remove("highlight");
-        tile.removeEventListener("click", this.movePlayer);
-      }
-
-      this.retaliation();
-    });
+        this.retaliation();
+      },
+      { once: true }
+    );
   };
 
   gameOver = (opponent, attacker) => {
-    if (opponent.health <= 0) {
+    if (opponent.health <= 99) {
+      document.querySelector(".modal-window").classList.remove("open");
+
       document.querySelector("#gameOverModal").classList.add("open");
       document.querySelector(
         "#gameOverModal p:first-of-type"
@@ -462,6 +481,8 @@ export default class Game {
         .addEventListener("click", () => {
           document.querySelector("#gameOverModal").classList.remove("open");
         });
+
+      return true;
     }
   };
 
@@ -486,4 +507,8 @@ export default class Game {
 
     !attack && this.playerMoves();
   };
+
+  //  asyncDelay = (ms) => {
+  //   return new Promise(resolve => setTimeout(resolve, ms));
+  // }
 }

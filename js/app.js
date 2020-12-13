@@ -1,3 +1,4 @@
+import 'regenerator-runtime/runtime'
 import Player from "./player";
 import Game from "./game";
 import { mario, luigi, fire, gun } from "./assets";
@@ -14,3 +15,7 @@ const newGame = () => {
 };
 
 document.querySelector("#newGame").addEventListener("click", newGame);
+document.querySelector("#newGame2").addEventListener("click", () => {
+  console.log('New game after game over...')
+  newGame()
+});

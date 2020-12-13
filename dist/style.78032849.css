@@ -114,14 +114,11 @@ body {
   display: flex;
   z-index: -1;
   opacity: 0;
-  transform: scale(0);
-  transition: all 0.5s ease;
 }
 
 .modal-window.open {
   z-index: 9999;
   opacity: 1;
-  transform: scale(1);
 }
 
 .modal-window > div {
@@ -129,6 +126,12 @@ body {
   padding: 30px;
   margin: auto;
   text-align: center;
+  transform: scale(0);
+  transition: all 0.5s ease;
+}
+
+.modal-window.open > div {
+  transform: scale(1);
 }
 
 .modal-window button {
