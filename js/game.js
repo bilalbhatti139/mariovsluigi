@@ -95,8 +95,32 @@ export default class Game {
       this.placeItem(item, type);
     } else {
       if (type === "player") {
-        this.gridSquares[randomSquare].innerHTML = item.image;
         const { row, column } = this.gridSquares[randomSquare].dataset;
+
+        if (this.players[0].location.row > 0) {
+          const r1 = this.players[0].location.row;
+          const c1 = this.players[0].location.column;
+
+          if (
+            this.getPlayerDistance(
+              Number(r1),
+              Number(c1),
+              Number(row),
+              Number(column)
+            )
+          ) {
+            console.log(
+              "Matched...",
+              Number(r1),
+              Number(c1),
+              Number(row),
+              Number(column)
+            );
+            return this.placeItem(item, type);
+          }
+        }
+
+        this.gridSquares[randomSquare].innerHTML = item.image;
         this.players[item.id - 1].location = { row, column };
       } else if (type === "obstacle") {
         const { row, column } = this.gridSquares[randomSquare].dataset;
@@ -120,6 +144,13 @@ export default class Game {
       }
       this.gridSquares[randomSquare].classList.add(type);
     }
+  };
+
+  getPlayerDistance = (r1, c1, r2, c2) => {
+    if (Math.abs(r1 - r2) <= 4) return true;
+    if (Math.abs(c1 - c2) <= 4) return true;
+
+    
   };
 
   playerMoves = () => {

@@ -1098,10 +1098,21 @@ var Game = function Game(players) {
       _this.placeItem(item, type);
     } else {
       if (type === "player") {
-        _this.gridSquares[randomSquare].innerHTML = item.image;
         var _this$gridSquares$ran = _this.gridSquares[randomSquare].dataset,
             row = _this$gridSquares$ran.row,
             column = _this$gridSquares$ran.column;
+
+        if (_this.players[0].location.row > 0) {
+          var r1 = _this.players[0].location.row;
+          var c1 = _this.players[0].location.column;
+
+          if (_this.getPlayerDistance(Number(r1), Number(c1), Number(row), Number(column))) {
+            console.log("Matched...", Number(r1), Number(c1), Number(row), Number(column));
+            return _this.placeItem(item, type);
+          }
+        }
+
+        _this.gridSquares[randomSquare].innerHTML = item.image;
         _this.players[item.id - 1].location = {
           row: row,
           column: column
@@ -1128,6 +1139,11 @@ var Game = function Game(players) {
 
       _this.gridSquares[randomSquare].classList.add(type);
     }
+  });
+
+  _defineProperty(this, "getPlayerDistance", function (r1, c1, r2, c2) {
+    if (Math.abs(r1 - r2) <= 4) return true;
+    if (Math.abs(c1 - c2) <= 4) return true;
   });
 
   _defineProperty(this, "playerMoves", function () {
@@ -1461,7 +1477,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "39251" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "34385" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
