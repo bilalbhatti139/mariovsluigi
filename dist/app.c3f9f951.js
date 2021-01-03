@@ -1052,7 +1052,7 @@ var Game = function Game(players) {
       _iterator.f();
     }
 
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 10; i++) {
       _this.placeItem("<img src=\"".concat(_assets.goomba, "\" width=\"50\" />"), "obstacle");
     }
 
@@ -1092,58 +1092,75 @@ var Game = function Game(players) {
 
   _defineProperty(this, "placeItem", function (item, type) {
     var randomSquare = Math.floor(Math.random() * _this.gridSquares.length);
-    var objClass = _this.gridSquares[randomSquare].classList;
+    var _this$gridSquares$ran = _this.gridSquares[randomSquare].dataset,
+        row = _this$gridSquares$ran.row,
+        column = _this$gridSquares$ran.column;
 
-    if (objClass.contains("weapon") || objClass.contains("player") || objClass.contains("obstacle")) {
-      _this.placeItem(item, type);
-    } else {
-      if (type === "player") {
-        var _this$gridSquares$ran = _this.gridSquares[randomSquare].dataset,
-            row = _this$gridSquares$ran.row,
-            column = _this$gridSquares$ran.column;
-
-        if (_this.players[0].location.row > 0) {
-          var r1 = _this.players[0].location.row;
-          var c1 = _this.players[0].location.column;
-
-          if (_this.getPlayerDistance(Number(r1), Number(c1), Number(row), Number(column))) {
-            console.log("Matched...", Number(r1), Number(c1), Number(row), Number(column));
-            return _this.placeItem(item, type);
-          }
-        }
-
-        _this.gridSquares[randomSquare].innerHTML = item.image;
-        _this.players[item.id - 1].location = {
-          row: row,
-          column: column
-        };
-      } else if (type === "obstacle") {
-        var _this$gridSquares$ran2 = _this.gridSquares[randomSquare].dataset,
-            _row = _this$gridSquares$ran2.row,
-            _column = _this$gridSquares$ran2.column; //console.log("elm", this.gridSquares[randomSquare]);
-
-        var r = document.querySelector("[data-row=\"".concat(_row, "\"].obstacle"));
-        var c = document.querySelector("[data-column=\"".concat(_column, "\"].obstacle"));
-
-        if (r || c) {
-          console.log("sommmmmmmmmmething found", _this.gridSquares[randomSquare]);
-
-          _this.placeItem(item, type);
-        } else {
-          console.log("available....");
-          _this.gridSquares[randomSquare].innerHTML = item;
-        }
-      } else {
-        _this.gridSquares[randomSquare].innerHTML = item;
+    var getPlayerDistance = function getPlayerDistance(r, c) {
+      if (_this.players[0].location.row > 0) {
+        var _this$players$0$locat = _this.players[0].location,
+            _row = _this$players$0$locat.row,
+            _column = _this$players$0$locat.column;
+        _row = +_row;
+        _column = +_column;
+        if (Math.abs(r - _row) <= 4) return true;
+        if (Math.abs(c - _column) <= 4) return true;
+        var r1c1 = document.querySelector("[data-row=\"".concat(r - 1, "\"][data-column=\"").concat(c - 1, "\"]"));
+        var r2c2 = document.querySelector("[data-row=\"".concat(r - 1, "\"][data-column=\"").concat(c + 1, "\"]"));
+        var r3c3 = document.querySelector("[data-row=\"".concat(r + 1, "\"][data-column=\"").concat(c - 1, "\"]"));
+        var r4c4 = document.querySelector("[data-row=\"".concat(r + 1, "\"][data-column=\"").concat(c + 1, "\"]"));
+        if (r1c1 && r1c1.classList.contains("player")) return true;
+        if (r2c2 && r2c2.classList.contains("player")) return true;
+        if (r3c3 && r3c3.classList.contains("player")) return true;
+        if (r4c4 && r4c4.classList.contains("player")) return true;
       }
+    };
 
-      _this.gridSquares[randomSquare].classList.add(type);
+    var getObstacleDistance = function getObstacleDistance(row, column) {
+      var r1 = document.querySelector("[data-row=\"".concat(row - 1, "\"][data-column=\"").concat(column, "\"]"));
+      var r2 = document.querySelector("[data-row=\"".concat(row - 2, "\"][data-column=\"").concat(column, "\"]"));
+      var r3 = document.querySelector("[data-row=\"".concat(row + 1, "\"][data-column=\"").concat(column, "\"]"));
+      var r4 = document.querySelector("[data-row=\"".concat(row + 2, "\"][data-column=\"").concat(column, "\"]"));
+      var c1 = document.querySelector("[data-column=\"".concat(column - 1, "\"][data-row=\"").concat(row, "\"]"));
+      var c2 = document.querySelector("[data-column=\"".concat(column - 2, "\"][data-row=\"").concat(row, "\"]"));
+      var c3 = document.querySelector("[data-column=\"".concat(column + 1, "\"][data-row=\"").concat(row, "\"]"));
+      var c4 = document.querySelector("[data-column=\"".concat(column + 2, "\"][data-row=\"").concat(row, "\"]"));
+      if (r1 && r1.classList.contains("obstacle")) return true;
+      if (r2 && r2.classList.contains("obstacle")) return true;
+      if (r3 && r3.classList.contains("obstacle")) return true;
+      if (r4 && r4.classList.contains("obstacle")) return true;
+      if (c1 && c1.classList.contains("obstacle")) return true;
+      if (c2 && c2.classList.contains("obstacle")) return true;
+      if (c3 && c3.classList.contains("obstacle")) return true;
+      if (c4 && c4.classList.contains("obstacle")) return true;
+      var r1c1 = document.querySelector("[data-row=\"".concat(row - 1, "\"][data-column=\"").concat(column - 1, "\"]"));
+      var r2c2 = document.querySelector("[data-row=\"".concat(row - 1, "\"][data-column=\"").concat(column + 1, "\"]"));
+      var r3c3 = document.querySelector("[data-row=\"".concat(row + 1, "\"][data-column=\"").concat(column - 1, "\"]"));
+      var r4c4 = document.querySelector("[data-row=\"".concat(row + 1, "\"][data-column=\"").concat(column + 1, "\"]"));
+      if (r1c1 && r1c1.classList.contains("obstacle")) return true;
+      if (r2c2 && r2c2.classList.contains("obstacle")) return true;
+      if (r3c3 && r3c3.classList.contains("obstacle")) return true;
+      if (r4c4 && r4c4.classList.contains("obstacle")) return true;
+    };
+
+    if (_this.gridSquares[randomSquare].classList.contains("full")) return _this.placeItem(item, type);
+
+    if (type === "player") {
+      if (getPlayerDistance(Number(row), Number(column))) return _this.placeItem(item, type);
+      _this.gridSquares[randomSquare].innerHTML = item.image;
+      _this.players[item.id - 1].location = {
+        row: row,
+        column: column
+      };
+    } else if (type === "obstacle" && getObstacleDistance(+row, +column)) {
+      return _this.placeItem(item, type);
+    } else {
+      _this.gridSquares[randomSquare].innerHTML = item;
     }
-  });
 
-  _defineProperty(this, "getPlayerDistance", function (r1, c1, r2, c2) {
-    if (Math.abs(r1 - r2) <= 4) return true;
-    if (Math.abs(c1 - c2) <= 4) return true;
+    _this.gridSquares[randomSquare].classList.add(type);
+
+    _this.gridSquares[randomSquare].classList.add("full");
   });
 
   _defineProperty(this, "playerMoves", function () {
@@ -1477,7 +1494,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "34385" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "39129" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

@@ -30,7 +30,7 @@ export default class Game {
       tile.removeAttribute("class");
     }
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 10; i++) {
       this.placeItem(`<img src="${goomba}" width="50" />`, "obstacle");
     }
 
@@ -85,72 +85,113 @@ export default class Game {
 
   placeItem = (item, type) => {
     const randomSquare = Math.floor(Math.random() * this.gridSquares.length);
-    const objClass = this.gridSquares[randomSquare].classList;
+    const { row, column } = this.gridSquares[randomSquare].dataset;
 
-    if (
-      objClass.contains("weapon") ||
-      objClass.contains("player") ||
-      objClass.contains("obstacle")
-    ) {
-      this.placeItem(item, type);
-    } else {
-      if (type === "player") {
-        const { row, column } = this.gridSquares[randomSquare].dataset;
+    const getPlayerDistance = (r, c) => {
+      if (this.players[0].location.row > 0) {
+        let {row, column} = this.players[0].location;
 
-        if (this.players[0].location.row > 0) {
-          const r1 = this.players[0].location.row;
-          const c1 = this.players[0].location.column;
+        row = +row;
+        column = +column;
 
-          if (
-            this.getPlayerDistance(
-              Number(r1),
-              Number(c1),
-              Number(row),
-              Number(column)
-            )
-          ) {
-            console.log(
-              "Matched...",
-              Number(r1),
-              Number(c1),
-              Number(row),
-              Number(column)
-            );
-            return this.placeItem(item, type);
-          }
-        }
 
-        this.gridSquares[randomSquare].innerHTML = item.image;
-        this.players[item.id - 1].location = { row, column };
-      } else if (type === "obstacle") {
-        const { row, column } = this.gridSquares[randomSquare].dataset;
-        //console.log("elm", this.gridSquares[randomSquare]);
-        const r = document.querySelector(`[data-row="${row}"].obstacle`);
+        if (Math.abs(r - row) <= 4) return true;
+        if (Math.abs(c - column) <= 4) return true;
 
-        const c = document.querySelector(`[data-column="${column}"].obstacle`);
+        const r1c1 = document.querySelector(
+          `[data-row="${r - 1}"][data-column="${c - 1}"]`
+        );
+        const r2c2 = document.querySelector(
+          `[data-row="${r - 1}"][data-column="${c + 1}"]`
+        );
+        const r3c3 = document.querySelector(
+          `[data-row="${r + 1}"][data-column="${c - 1}"]`
+        );
+        const r4c4 = document.querySelector(
+          `[data-row="${r + 1}"][data-column="${c + 1}"]`
+        );
 
-        if (r || c) {
-          console.log(
-            "sommmmmmmmmmething found",
-            this.gridSquares[randomSquare]
-          );
-          this.placeItem(item, type);
-        } else {
-          console.log("available....");
-          this.gridSquares[randomSquare].innerHTML = item;
-        }
-      } else {
-        this.gridSquares[randomSquare].innerHTML = item;
+        if (r1c1 && r1c1.classList.contains("player")) return true;
+        if (r2c2 && r2c2.classList.contains("player")) return true;
+        if (r3c3 && r3c3.classList.contains("player")) return true;
+        if (r4c4 && r4c4.classList.contains("player")) return true;
+
+
       }
-      this.gridSquares[randomSquare].classList.add(type);
+    };
+
+    const getObstacleDistance = (row, column) => {
+      const r1 = document.querySelector(
+        `[data-row="${row - 1}"][data-column="${column}"]`
+      );
+      const r2 = document.querySelector(
+        `[data-row="${row - 2}"][data-column="${column}"]`
+      );
+      const r3 = document.querySelector(
+        `[data-row="${row + 1}"][data-column="${column}"]`
+      );
+      const r4 = document.querySelector(
+        `[data-row="${row + 2}"][data-column="${column}"]`
+      );
+
+      const c1 = document.querySelector(
+        `[data-column="${column - 1}"][data-row="${row}"]`
+      );
+      const c2 = document.querySelector(
+        `[data-column="${column - 2}"][data-row="${row}"]`
+      );
+      const c3 = document.querySelector(
+        `[data-column="${column + 1}"][data-row="${row}"]`
+      );
+      const c4 = document.querySelector(
+        `[data-column="${column + 2}"][data-row="${row}"]`
+      );
+
+      if (r1 && r1.classList.contains("obstacle")) return true;
+      if (r2 && r2.classList.contains("obstacle")) return true;
+      if (r3 && r3.classList.contains("obstacle")) return true;
+      if (r4 && r4.classList.contains("obstacle")) return true;
+
+      if (c1 && c1.classList.contains("obstacle")) return true;
+      if (c2 && c2.classList.contains("obstacle")) return true;
+      if (c3 && c3.classList.contains("obstacle")) return true;
+      if (c4 && c4.classList.contains("obstacle")) return true;
+
+      const r1c1 = document.querySelector(
+        `[data-row="${row - 1}"][data-column="${column - 1}"]`
+      );
+      const r2c2 = document.querySelector(
+        `[data-row="${row - 1}"][data-column="${column + 1}"]`
+      );
+      const r3c3 = document.querySelector(
+        `[data-row="${row + 1}"][data-column="${column - 1}"]`
+      );
+      const r4c4 = document.querySelector(
+        `[data-row="${row + 1}"][data-column="${column + 1}"]`
+      );
+
+      if (r1c1 && r1c1.classList.contains("obstacle")) return true;
+      if (r2c2 && r2c2.classList.contains("obstacle")) return true;
+      if (r3c3 && r3c3.classList.contains("obstacle")) return true;
+      if (r4c4 && r4c4.classList.contains("obstacle")) return true;
+    };
+
+    if (this.gridSquares[randomSquare].classList.contains("full"))
+      return this.placeItem(item, type);
+
+    if (type === "player") {
+      if (getPlayerDistance(Number(row), Number(column)))
+        return this.placeItem(item, type);
+
+      this.gridSquares[randomSquare].innerHTML = item.image;
+      this.players[item.id - 1].location = { row, column };
+    } else if (type === "obstacle" && getObstacleDistance(+row, +column)) {
+      return this.placeItem(item, type);
+    } else {
+      this.gridSquares[randomSquare].innerHTML = item;
     }
-  };
-
-  getPlayerDistance = (r1, c1, r2, c2) => {
-    if (Math.abs(r1 - r2) <= 4) return true;
-    if (Math.abs(c1 - c2) <= 4) return true;
-
-    
+    this.gridSquares[randomSquare].classList.add(type);
+    this.gridSquares[randomSquare].classList.add("full");
   };
 
   playerMoves = () => {
