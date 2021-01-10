@@ -87,36 +87,59 @@ export default class Game {
     const randomSquare = Math.floor(Math.random() * this.gridSquares.length);
     const { row, column } = this.gridSquares[randomSquare].dataset;
 
-    const getPlayerDistance = (r, c) => {
+    const getPlayerDistance = (row, column) => {
       if (this.players[0].location.row > 0) {
-        let {row, column} = this.players[0].location;
+        const p1c = +this.players[0].location.column;
+        const p1r = +this.players[0].location.row;
 
-        row = +row;
-        column = +column;
+        const yDistance = Math.abs(p1r - row);
+        const xDistance = Math.abs(p1c - column);
 
+        // Check if P1 is in same column and less than 4 steps away from P2
+        if (p1c === column && yDistance <= 4) {
+          // Check if there's a barrier between two players
+          for (let i = 1; i <= yDistance; i++) {
+            if (p1r > row) {
+              const y = document.querySelector(
+                `[data-row="${p1r - i}"][data-column="${p1c}"]`
+              );
+              if (y && y.classList.contains("obstacle")) return false;
+            } else {
+              const y = document.querySelector(
+                `[data-row="${p1r + i}"][data-column="${p1c}"]`
+              );
+              if (y && y.classList.contains("obstacle")) return false;
+            }
+          }
 
-        if (Math.abs(r - row) <= 4) return true;
-        if (Math.abs(c - column) <= 4) return true;
+          return true;
+        }
 
-        const r1c1 = document.querySelector(
-          `[data-row="${r - 1}"][data-column="${c - 1}"]`
-        );
-        const r2c2 = document.querySelector(
-          `[data-row="${r - 1}"][data-column="${c + 1}"]`
-        );
-        const r3c3 = document.querySelector(
-          `[data-row="${r + 1}"][data-column="${c - 1}"]`
-        );
-        const r4c4 = document.querySelector(
-          `[data-row="${r + 1}"][data-column="${c + 1}"]`
-        );
+        // Check if P1 is in same row and less than 4 steps away from P2
+        if (p1r === row && xDistance <= 4) {
+          // Check if there's a obstacle between two players
+          for (let i = 1; i <= xDistance; i++) {
+            if (p1c > column) {
+              const x = document.querySelector(
+                `[data-row="${p1r}"][data-column="${p1c - i}"]`
+              );
+              if (x && x.classList.contains("obstacle")) return false;
+            } else {
+              const x = document.querySelector(
+                `[data-row="${p1r}"][data-column="${p1c + i}"]`
+              );
+              if (x && x.classList.contains("obstacle")) return false;
+            }
+          }
 
-        if (r1c1 && r1c1.classList.contains("player")) return true;
-        if (r2c2 && r2c2.classList.contains("player")) return true;
-        if (r3c3 && r3c3.classList.contains("player")) return true;
-        if (r4c4 && r4c4.classList.contains("player")) return true;
+          return true;
+        }
 
-
+        if (
+          (xDistance === 1 && yDistance <= 4) ||
+          (yDistance === 1 && xDistance <= 4)
+        )
+          return true;
       }
     };
 
@@ -483,61 +506,60 @@ export default class Game {
 
     // 2. Decreasing health of opposite member
 
-    document.querySelector("#protect").addEventListener(
-      "click",
-      (e) => {
-        const newHealth = opponent.health - attacker.weapon.damage / 2;
+    const protect = () => {
+      document.querySelector("#attack").removeEventListener("click", attack);
+      const newHealth = opponent.health - attacker.weapon.damage / 2;
 
-        this.players[opponent.id - 1].health = newHealth;
-        document.querySelector(`#p${opponent.id}-health`).innerHTML = newHealth;
-        document.querySelector(`#p${opponent.id}-shield`).innerHTML =
-          "Protected";
-        document
-          .querySelector(`#p${opponent.id}-shield-image`)
-          .classList.add("protected");
+      this.players[opponent.id - 1].health = newHealth;
+      document.querySelector(`#p${opponent.id}-health`).innerHTML = newHealth;
+      document.querySelector(`#p${opponent.id}-shield`).innerHTML = "Protected";
+      document
+        .querySelector(`#p${opponent.id}-shield-image`)
+        .classList.add("protected");
 
-        document.querySelector("#fightModal").classList.remove("open");
+      document.querySelector("#fightModal").classList.remove("open");
 
-        if (this.gameOver(opponent, attacker)) return;
+      if (this.gameOver(opponent, attacker)) return;
 
-        this.playerMoves();
+      this.retaliation();
+    };
 
-        // e.target.removeEventListener('click', this.retaliation);
-      },
-      { once: true }
-    );
+    const attack = () => {
+      document.querySelector("#protect").removeEventListener("click", protect);
+      const newHealth = opponent.health - attacker.weapon.damage;
 
-    document.querySelector("#attack").addEventListener(
-      "click",
-      () => {
-        const newHealth = opponent.health - attacker.weapon.damage;
+      this.players[opponent.id - 1].health = newHealth;
+      document.querySelector(`#p${opponent.id}-health`).innerHTML = newHealth;
+      document.querySelector(`#p${opponent.id}-shield`).innerHTML =
+        "Unprotected";
+      document
+        .querySelector(`#p${opponent.id}-shield-image`)
+        .classList.remove("protected");
 
-        this.players[opponent.id - 1].health = newHealth;
-        document.querySelector(`#p${opponent.id}-health`).innerHTML = newHealth;
-        document.querySelector(`#p${opponent.id}-shield`).innerHTML =
-          "Unprotected";
-        document
-          .querySelector(`#p${opponent.id}-shield-image`)
-          .classList.remove("protected");
+      document.querySelector("#fightModal").classList.remove("open");
 
-        document.querySelector("#fightModal").classList.remove("open");
+      // Remove highlights
+      for (const tile of document.querySelectorAll(".highlight")) {
+        tile.classList.remove("highlight");
+        tile.removeEventListener("click", this.movePlayer);
+      }
 
-        // Remove highlights
-        for (const tile of document.querySelectorAll(".highlight")) {
-          tile.classList.remove("highlight");
-          tile.removeEventListener("click", this.movePlayer);
-        }
+      if (this.gameOver(opponent, attacker)) return;
 
-        if (this.gameOver(opponent, attacker)) return;
+      this.retaliation();
+    };
 
-        this.retaliation();
-      },
-      { once: true }
-    );
+    document
+      .querySelector("#protect")
+      .addEventListener("click", protect, { once: true });
+
+    document
+      .querySelector("#attack")
+      .addEventListener("click", attack, { once: true });
   };
 
   gameOver = (opponent, attacker) => {
-    if (opponent.health <= 99) {
+    if (opponent.health <= 0) {
       document.querySelector(".modal-window").classList.remove("open");
 
       document.querySelector("#gameOverModal").classList.add("open");
@@ -568,7 +590,7 @@ export default class Game {
     panel.classList.add("active");
   };
 
-  changeTurn = (attack = false) => {
+  changeTurn = () => {
     if (this.currentPlayer.id === 1) {
       this.currentPlayer = this.players[1];
     } else {
@@ -577,10 +599,6 @@ export default class Game {
 
     this.detectTurn();
 
-    !attack && this.playerMoves();
+    this.playerMoves();
   };
-
-  //  asyncDelay = (ms) => {
-  //   return new Promise(resolve => setTimeout(resolve, ms));
-  // }
 }
